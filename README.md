@@ -1,2 +1,2 @@
 # noise-generator-one
-Pure Data-patches for noise performance.
+SuperCollider code for noise performance.
