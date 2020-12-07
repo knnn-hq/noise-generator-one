@@ -1,0 +1,11 @@
+~/.local/share/SuperCollider/downloaded-quarks/Freesound=https://github.com/g-roma/Freesound.sc@67460125cad99bd0adbbd533d8b48e478be9c963
+~/.local/share/SuperCollider/downloaded-quarks/Require=https://github.com/scztt/Require.quark@tags/1.0.3
+~/.local/share/SuperCollider/downloaded-quarks/TimeStretch=https://github.com/spluta/TimeStretch@ee491b06129e8237a1783046ac542e0fb048e3ce
+~/.local/share/SuperCollider/downloaded-quarks/autogui=https://github.com/supercollider-quarks/autogui@8102b5b04f77e72dae004b1c0cfe1f883348c5b6
+~/.local/share/SuperCollider/downloaded-quarks/Sequencer=https://github.com/supercollider-quarks/Sequencer@9b66abd72cb15c76fd93f90077c41e12ba55d510
+~/.local/share/SuperCollider/downloaded-quarks/JITLibExtensions=https://github.com/supercollider-quarks/JITLibExtensions@2c882fc56105f22f2ea5cc176d393c89d1fe5918
+~/.local/share/SuperCollider/downloaded-quarks/KtlLoop=https://github.com/supercollider-quarks/KtlLoop@acbd574147e4f8f5c3e13723a79bbb3a43ec1870
+~/.local/share/SuperCollider/downloaded-quarks/KeyPlayer=https://github.com/supercollider-quarks/KeyPlayer@b2c011b90bd05974b64c8c792e82b0bc8d9cff26
+~/.local/share/SuperCollider/downloaded-quarks/PianoRoll=https://github.com/defaultxr/PianoRoll.git@ded2d528f422a5212463738c7109e14d96db2760
+~/.local/share/SuperCollider/downloaded-quarks/Sequence=https://github.com/defaultxr/Sequence@95e272f32d968420596ed473e8051e663842eed3
+~/.local/share/SuperCollider/downloaded-quarks/Keymap=https://github.com/defaultxr/Keymap@c772203b79bfc0a39e6b3c7d1140e4235830ec74
