@@ -1,9 +1,5 @@
-(
-Quarks.save(Document.current.dir.postln ++ "/quarks.txt");
-)
-(
-Quarks.load(Document.current.dir.postln ++ "/quarks.txt");
-)
+(Quarks.save(Document.current.dir.postln ++ "/quarks.txt");)
+(Quarks.load(Document.current.dir.postln ++ "/quarks.txt");)
 (
 Require("helpers/**", always: true);
 Require("generators/**", always: true);
