@@ -11,6 +11,7 @@ Require("effects/**", always: true);
 ~busMaster = Bus.audio(s, 2);
 ~busR = Bus.audio(s, 2);
 ~busD = Bus.audio(s, 2);
+~busDis = Bus.audio(s, 2);
 
 ~masterReverb = Synth.new(\Reverb, [\inBus, ~busMaster,
 	\roomSize, 66,
@@ -27,28 +28,40 @@ Require("effects/**", always: true);
 ]);
 ~delay = Synth.before(~masterReverb, \Greyish, [\inBus, ~busD, \outBus, ~busMaster]);
 
-~atari = Synth.before(~delay, \Atari, [\effectBus, [~busD, ~busD]]);
-~bosh = Synth.before(~delay, \Bosh, [\effectBus, [~busD, ~busR]]);
+~atari = Synth.before(~delay, \Atari, [\effectBus, [~busD, ~busD],
+	\level, 0]);
+~bosh = Synth.before(~delay, \Bosh, [\effectBus, [~busD, ~busR],
+	\level, 0]);
 ~piano = Synth.before(~reverb, \PianoRepeater, [\effectBus, [~busR, ~busD],
-	\rate, 0.3
+	\rate, 0.3,
+	\level, 0
 ]);
 
-~disMulti = 0.0;
-~disProb = 0.0;
+~disMulti = 0.5;
+~disProb = 0.5;
+~disTargetMulti = false;
 
 ~disint = Synth.before(~masterReverb, \Disintegrator, [
-	\input, SoundIn.ar(0),
-	\outBus, ~busMaster
+	\inBus, ~busDis,
+	\outBus, ~busMaster,
+	\multiplier, -1
 ]);
 
 ~midiCC = MIDIFunc.cc({arg msg, chan;
 	var shift = switch(msg,
 		65, { -1 },
-		1,  { 1 }
+		1,  { 1 },
+		false
 	);
-	~disProb = ~disProb + shift;
-	~disProb.postln;
-	~disint.set(\probability, ~disProb);
+	if(shift != false, {
+		if (~disTargetMulti, {
+			~disMulti = ~disMulti + (shift * 0.1);
+			~disint.set(\multiplier, ~disMulti);
+		}, {
+			~disProb = ~disProb + (shift * 0.1);
+			~disint.set(\probability, ~disProb);
+		});
+	});
 });
 ~midiBend = MIDIFunc.bend({arg num, chan, src;
 	var target = switch(chan,
@@ -62,6 +75,14 @@ Require("effects/**", always: true);
 	var level = LinLin.ar(num, 0, 16383, 0, 1);
 	if (target != false, {
 		target.set(\level, LinLin.ar(num, 0, 16383, 0, 1));
+	});
+});
+{Out.ar(~busDis, SoundIn.ar)}.play;
+
+~midiNote = MIDIFunc.noteOn({arg chan, note;
+	if ((chan == 127).and((note == 96).or(note == 97)), {
+		~disTargetMulti = not(~disTargetMulti);
+		~disTargetMulti.postln;
 	});
 });
 
