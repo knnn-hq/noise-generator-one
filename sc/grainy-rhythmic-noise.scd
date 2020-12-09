@@ -13,6 +13,8 @@ Require("effects/**", always: true);
 ~busD = Bus.audio(s, 2);
 ~busDis = Bus.audio(s, 2);
 
+~baseRate = 0.5;
+
 ~masterReverb = Synth.new(\Reverb, [\inBus, ~busMaster,
 	\roomSize, 66,
 	\dry, 0.95,
@@ -33,19 +35,25 @@ Require("effects/**", always: true);
 ~bosh = Synth.before(~delay, \Bosh, [\effectBus, [~busD, ~busR],
 	\level, 0]);
 ~piano = Synth.before(~reverb, \PianoRepeater, [\effectBus, [~busR, ~busD],
-	\rate, 0.3,
 	\level, 0
 ]);
 
-~disMulti = 0.5;
-~disProb = 0.5;
-~disTargetMulti = false;
+~disSize = 0.1;
+~disRate = 10;
+~disTargetRate = false;
 
 ~disint = Synth.before(~masterReverb, \Disintegrator, [
 	\inBus, ~busDis,
-	\outBus, ~busMaster,
-	\multiplier, -1
+	\outBus, ~busMaster
 ]);
+
+~updateRate = {
+	~atari.set(\rate, ~baseRate * 2);
+	~bosh.set(\rate, ~baseRate * 1.1);
+	~piano.set(\rate, ~baseRate * 0.5);
+	~disint.set(\size, max(~baseRate, 0.1));
+	~disint.set(\rate, ~baseRate * 5);
+};
 
 ~midiCC = MIDIFunc.cc({arg msg, chan;
 	var shift = switch(msg,
@@ -54,13 +62,9 @@ Require("effects/**", always: true);
 		false
 	);
 	if(shift != false, {
-		if (~disTargetMulti, {
-			~disMulti = ~disMulti + (shift * 0.1);
-			~disint.set(\multiplier, ~disMulti);
-		}, {
-			~disProb = ~disProb + (shift * 0.1);
-			~disint.set(\probability, ~disProb);
-		});
+		~baseRate = ~baseRate + (0.05 * shift);
+		if (~baseRate < 0.01, { ~baseRate = 0.01; });
+		~updateRate.value;
 	});
 });
 ~midiBend = MIDIFunc.bend({arg num, chan, src;
@@ -81,12 +85,13 @@ Require("effects/**", always: true);
 
 ~midiNote = MIDIFunc.noteOn({arg chan, note;
 	if ((chan == 127).and((note == 96).or(note == 97)), {
-		~disTargetMulti = not(~disTargetMulti);
-		~disTargetMulti.postln;
+		~disTargetRate = not(~disTargetRate);
+		~disTargetRate.postln;
 	});
 });
 
 
+~updateRate.value;
 
 Routine {
 	Window()
@@ -106,8 +111,7 @@ Routine {
 				VLayout(
 					StaticText().string_("Bosh"),
 					HLayout(
-						~makeSlider.value("dry", ~bosh, \direct, start: 0.5),
-						~makeSlider.value("rate", ~bosh, \rate, start: 0.5, min: 0.1, max: 10),
+						~makeSlider.value("dry", ~bosh, \direct, start: 0.5)
 					)
 				),
 				20,
