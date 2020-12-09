@@ -1,10 +1,13 @@
 (Quarks.save(Document.current.dir.postln ++ "/quarks.txt");)
 (Quarks.load(Document.current.dir.postln ++ "/quarks.txt");)
 (
+MIDIClient.init;
+MIDIIn.connectAll;
+)
+(
 Require("helpers/**", always: true);
 Require("generators/**", always: true);
 Require("effects/**", always: true);
-
 ~busMaster = Bus.audio(s, 2);
 ~busR = Bus.audio(s, 2);
 ~busD = Bus.audio(s, 2);
@@ -29,6 +32,29 @@ Require("effects/**", always: true);
 ~piano = Synth.before(~reverb, \PianoRepeater, [\effectBus, [~busR, ~busD],
 	\rate, 0.3
 ]);
+
+~midiCC = MIDIFunc.cc({arg ...args;
+	"CC".postln;
+	args.postln;
+});
+~midiNote = MIDIFunc.noteOn({arg ...args;
+	"Note".postln;
+	args.postln;
+});
+~midiSlider = MIDIFunc.bend({arg num, chan, src;
+	var target = switch(chan,
+		0, { ~atari },
+		1, { ~bosh },
+		2, { ~piano },
+		~piano
+	);
+	var level = LinLin.ar(num, 0, 16383, 0, 1);
+	target.postln;
+	level.postln;
+	target.set(\level, LinLin.ar(num, 0, 16383, 0, 1));
+});
+// MIDIFunc.trace(true);
+
 
 Routine {
 	Window()
