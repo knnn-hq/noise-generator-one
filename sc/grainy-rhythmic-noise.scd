@@ -33,19 +33,29 @@ Require("effects/**", always: true);
 	\rate, 0.3
 ]);
 
-~midiCC = MIDIFunc.cc({arg ...args;
-	"CC".postln;
-	args.postln;
-});
-~midiNote = MIDIFunc.noteOn({arg ...args;
-	"Note".postln;
-	args.postln;
+~disMulti = 0.0;
+~disProb = 0.0;
+
+~disint = Synth.before(~masterReverb, \Disintegrator, [
+	\input, SoundIn.ar(0),
+	\outBus, ~busMaster
+]);
+
+~midiCC = MIDIFunc.cc({arg msg, chan;
+	var shift = switch(msg,
+		65, { -1 },
+		1,  { 1 }
+	);
+	~disProb = ~disProb + shift;
+	~disProb.postln;
+	~disint.set(\probability, ~disProb);
 });
 ~midiBend = MIDIFunc.bend({arg num, chan, src;
 	var target = switch(chan,
 		0, { ~atari },
 		1, { ~bosh },
 		2, { ~piano },
+		3, { ~disint },
 		8, { ~masterReverb },
 		{ false }
 	);
@@ -55,7 +65,6 @@ Require("effects/**", always: true);
 	});
 });
 
-MIDIFunc.trace(true);
 
 
 Routine {
