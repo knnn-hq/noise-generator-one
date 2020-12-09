@@ -41,19 +41,21 @@ Require("effects/**", always: true);
 	"Note".postln;
 	args.postln;
 });
-~midiSlider = MIDIFunc.bend({arg num, chan, src;
+~midiBend = MIDIFunc.bend({arg num, chan, src;
 	var target = switch(chan,
 		0, { ~atari },
 		1, { ~bosh },
 		2, { ~piano },
-		~piano
+		8, { ~masterReverb },
+		{ false }
 	);
 	var level = LinLin.ar(num, 0, 16383, 0, 1);
-	target.postln;
-	level.postln;
-	target.set(\level, LinLin.ar(num, 0, 16383, 0, 1));
+	if (target != false, {
+		target.set(\level, LinLin.ar(num, 0, 16383, 0, 1));
+	});
 });
-// MIDIFunc.trace(true);
+
+MIDIFunc.trace(true);
 
 
 Routine {
@@ -67,7 +69,6 @@ Routine {
 				VLayout(
 					StaticText().string_("Atari"),
 					HLayout(
-						~makeSlider.value("gain", ~atari, \level, start: 0.2),
 						~makeSlider.value("dry", ~atari, \direct, start: 0.1)
 					)
 				),
@@ -75,7 +76,6 @@ Routine {
 				VLayout(
 					StaticText().string_("Bosh"),
 					HLayout(
-						~makeSlider.value("gain", ~bosh, \level, start: 0.5),
 						~makeSlider.value("dry", ~bosh, \direct, start: 0.5),
 						~makeSlider.value("rate", ~bosh, \rate, start: 0.5, min: 0.1, max: 10),
 					)
@@ -84,7 +84,6 @@ Routine {
 				VLayout(
 					StaticText().string_("Piano"),
 					HLayout(
-						~makeSlider.value("gain", ~piano, \level, start: 0.05),
 						~makeSlider.value("dry", ~piano, \direct, start: 0.5)
 					)
 				),
