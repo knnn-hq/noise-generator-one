@@ -45,7 +45,7 @@ s.waitForBoot({
 	]);
 
 	~stock = Synth.before(~wetReverb, \stockhaus, [\effecBus, ~busWetReverb,
-		\level, 0.01,
+		\level, 0.1,
 		\direct, 0,
 		\freq, 70
 	]);
@@ -55,13 +55,13 @@ s.waitForBoot({
 		\dur, Pseq([Rest(1), 1/2, Rest(5)], inf),
 		\freq, 60,
 		\gliss, 0.9,
-		\level, 0.05,
+		\level, 0.1,
 		\direct, 0,
 		\effectBus, ~busDelay
 	).play;
 
-	~load_and_play_loop.value(wavDir +/+ "piano-1.wav", effectBus: ~busReverb, level: 0.2, direct: 0);
-	~load_and_play_loop.value(wavDir +/+ "piano-2.wav", effectBus: ~busFilter, level: 0.2, direct: 0);
+	~load_and_play_loop.value(wavDir +/+ "piano-1.wav", startRate: 0.8, effectBus: ~busReverb, level: 0.5, direct: 0);
+	~load_and_play_loop.value(wavDir +/+ "piano-2.wav", startRate: -0.8, effectBus: ~busFilter, level: 0.5, direct: 0);
 });
 
 s.freeAll;
