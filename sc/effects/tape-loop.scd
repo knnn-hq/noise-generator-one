@@ -85,8 +85,8 @@ SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0
 				});
 
 				"LOOP|#".post; n.post; "|".post; basename.post;
-				"-- rate: ".post; (rate * playDirection).post;
-				"-- dist: ".post; distLevel.postln;
+				" -- rate: ".post; (rate * playDirection).post;
+				" -- dist: ".post; distLevel.postln;
 
 				if (not(synth.isNil)) { // stop synth if playing
 					synth.stop;

@@ -37,7 +37,7 @@ s.waitForBoot({
 	// Delay
 	~delay = Synth.before(~wetReverb, \Greyish, [\inBus, ~busDelay, \outBus, ~busWetReverb,
 		\damping, 0.2,
-		\delayTime, 5,
+		\delayTime, 15,
 		\diffusion, 0.95,
 		\feedback, 0.95,
 		\size, 0.3
@@ -92,21 +92,21 @@ s.waitForBoot({
 		var pan = 0;
 		var panDirection = -1;
 		var rt = 0.25;
-		var midiBase;
+		var midiBase = 40;
 		loop {
-			midiBase = [27, 36, 45].choose;
+			midiBase = [27, 36, 45, 50].choose;
 			pan = pan + (0.1 * panDirection);
 			rt = ~rr.(rt / 2, rt * 2);
 
 			if (pan.abs >= 1, { panDirection = panDirection * -1});
 
-			"FEED: pan: ".post; pan.post; ", rt: ".post; rt.post; ", midiBase: ".post; midiBase.postln;
+			"FEEDBACKER -- pan: ".post; pan.post; ", rt: ".post; rt.post; ", midiBase: ".post; midiBase.postln;
 
 			~feed.set(\midiBase, midiBase);
 			~feed.set(\rt, rt);
 			~feed.set(\pan, pan);
 
-			delta = ~rr.(10, 20);
+			delta = ~rr.(5, 10);
 
 			delta.yield;
 		}

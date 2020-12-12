@@ -64,7 +64,7 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 			\pan, pan
 		]);
 
-		"STRETCH|".post; basename.post; ": factor: ".post; currStretch.postln;
+		"STRETCH|".post; basename.post; " -- factor: ".post; currStretch.postln;
 
 		Routine({
 			var delta;
