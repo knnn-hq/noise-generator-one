@@ -53,6 +53,7 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 	var envBuf = Buffer.alloc(s, s.sampleRate, 1);
 	var envSignal = Signal.newClear(s.sampleRate).waveFill({ |x| (1 - x.pow(2)).pow(1.25)}, -1.0, 1.0);
 	var currStretch = 10;
+	var basename = PathName(filename).fileName;
 
 	var do_stretch = { | buffer |
 		var paul = Synth(\paulstretchMono, [
@@ -63,7 +64,7 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 			\pan, pan
 		]);
 
-		"Stretching ".post; filename.postln;
+		"STRETCH/".post; basename.post; " -- factor: ".post; currStretch.postln;
 
 		Routine({
 			var delta;

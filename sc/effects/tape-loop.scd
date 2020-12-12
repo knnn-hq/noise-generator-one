@@ -45,6 +45,7 @@ SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0
 
 ~load_and_play_loop = { arg filename, outBus = 0, effectBus = 0, level = 1.0, direct = 0.5, startRate = 0.5, startDist = 0.2, pan = 0;
 	var routine;
+	var basename = PathName(filename).fileName;
 
 	var createRoutine = { arg sampleBuf;
 		var numFrames = sampleBuf.numFrames;
@@ -83,12 +84,9 @@ SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0
 					cutLength = 0;
 				});
 
-				"......".postln;
-				"LOOP #".post; n.postln;
-				"......".postln;
-				"Restarting loop...".post; filename.postln;
-				"Rate: ".post; (rate * playDirection).postln;
-				"Dist: ".post; distLevel.postln;
+				"LOOP: #".post; n.post; "/".post; basename.post;
+				"-- rate: ".post; (rate * playDirection).post;
+				"-- dist: ".post; distLevel.postln;
 
 				if (not(synth.isNil)) { // stop synth if playing
 					synth.stop;
