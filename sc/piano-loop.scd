@@ -102,7 +102,7 @@ s.waitForBoot({
 
 			"FEED: pan: ".post; pan.post; ", rt: ".post; rt.post; ", midiBase: ".post; midiBase.postln;
 
-			~feed.set(\midiBase, );
+			~feed.set(\midiBase, midiBase);
 			~feed.set(\rt, rt);
 			~feed.set(\pan, pan);
 
