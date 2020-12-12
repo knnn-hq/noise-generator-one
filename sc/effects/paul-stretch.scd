@@ -52,9 +52,9 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 ~load_and_stretch = { arg filename, outBus = 0, effectBus = 0, level = 1.0, direct = 0.5, stretch = 50, window = 0.25, pan = 0;
 	var envBuf = Buffer.alloc(s, s.sampleRate, 1);
 	var envSignal = Signal.newClear(s.sampleRate).waveFill({ |x| (1 - x.pow(2)).pow(1.25)}, -1.0, 1.0);
+	var currStretch = 10;
 
 	var do_stretch = { | buffer |
-		var currStretch = 10;
 		var paul = Synth(\paulstretchMono, [
 			\outBus, outBus, \effectBus, effectBus,
 			\bufnum, buffer, \envBufNum, envBuf,
@@ -62,11 +62,18 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 			\stretch, currStretch, \window, window,
 			\pan, pan
 		]);
+
+		"Stretching ".post; filename.postln;
+
 		Routine({
 			var delta;
 
 			loop {
-				currStretch = currStretch * 1.1;
+				if (currStretch < stretch, {
+					currStretch = currStretch * 1.5;
+				}, {
+					currStretch = currStretch + 0.5;
+				});
 				paul.set(\stretch, currStretch);
 
 				delta = ~rr.(1, 5);
@@ -78,6 +85,6 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 	envBuf.loadCollection(envSignal);
 	s.sync();
 
-	Buffer.readChannel(s, filename, channels: [0], startFrame: 600000, numFrames: 1300000, action: do_stretch);
+	Buffer.readChannel(s, filename, channels: [0], startFrame: rrand(400000, 600000), numFrames: rrand(1300000, 1500000), action: do_stretch);
 };
 )

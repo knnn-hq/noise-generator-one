@@ -3,7 +3,7 @@ var wavDir = PathName.new(Document.current.dir).parentPath +/+ "wav";
 
 s.waitForBoot({
 	s.options.memSize = 10000;
-	TempoClock.default.tempo_(1);
+	TempoClock.default.tempo_(0.5);
 
 	Require("helpers/**", always: true);
 	Require("generators/**", always: true);
@@ -44,30 +44,47 @@ s.waitForBoot({
 		\size, 0.3
 	]);
 
-	~vinyl = Synth.before(~delay, \vinyl, [\effectBus, ~busDelay, \level, 0.05, \direct, 0]);
-
+	~vinyl = Synth.before(~delay, \vinyl, [\effectBus, ~busDelay, \level, 0.1, \direct, 0]);
 
 	~stock = Synth.before(~wetReverb, \stockhaus, [\effecBus, ~busWetReverb,
-		\level, 0.1,
+		\level, 0.15,
 		\direct, 0,
 		\freq, 70
 	]);
 
+	~playOrder = Routine({
+		[100, 200].do({ |dur| dur.yield });
+	});
+	~playList = Routine({ ["piano-1.wav", "piano-2.wav" ].do({ |f| f.yield }) });
+
 	Pbind(
 		\instrument, \kick,
 		\dur, Pseq([Rest(5), 1, Rest(5)], inf),
-		\freq, 40,
+		\freq, 70,
 		\gliss, 0.9,
-		\level, 0.3,
+		\level, 0.1,
 		\direct, 0,
 		\effectBus, ~busDelay
 	).play;
 
 
-	~load_and_stretch.(wavDir +/+ "piano-1.wav", effectBus: ~busReverb, direct: 0, stretch: 200, level: 0.7);
-	~load_and_play_loop.value(wavDir +/+ "piano-1.wav", startRate: 0.8, effectBus: ~busReverb, level: 0.4, direct: 0, startDist: 0.2, pan: -0.3);
-	~load_and_play_loop.value(wavDir +/+ "piano-2.wav", startRate: -0.8, effectBus: ~busFilter, level: 0.4, direct: 0, startDist: 0.3, pan: 0.3);
-});
 
-s.freeAll;
+	Task({
+		var delta;
+		var pan = -1;
+
+		while {
+			delta = ~playOrder.next;
+			delta.notNil
+		} {
+			var filename = wavDir +/+ ~playList.next;
+
+			~load_and_stretch.(filename, effectBus: ~busReverb, direct: 0, stretch: 1500, level: ~rr.(0.6, 0.8), pan: 0.5 * pan);
+			5.wait;
+			~load_and_play_loop.(filename, startRate: pan * 0.5, effectBus: ~busReverb, level: ~rr.(0.1, 0.25), direct: 0, startDist: 0.1, pan: 0.3 * pan);
+
+			pan = pan * -1;
+		}
+	}).play;
+});
 )
