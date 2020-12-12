@@ -52,14 +52,27 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 ~load_and_stretch = { arg filename, outBus = 0, effectBus = 0, level = 1.0, direct = 0.5, stretch = 50, window = 0.25, pan = 0;
 	var envBuf = Buffer.alloc(s, s.sampleRate, 1);
 	var envSignal = Signal.newClear(s.sampleRate).waveFill({ |x| (1 - x.pow(2)).pow(1.25)}, -1.0, 1.0);
+
 	var do_stretch = { | buffer |
-		Synth(\paulstretchMono, [
+		var currStretch = 10;
+		var paul = Synth(\paulstretchMono, [
 			\outBus, outBus, \effectBus, effectBus,
 			\bufnum, buffer, \envBufNum, envBuf,
 			\level, level, \direct, direct,
-			\stretch, stretch, \window, window,
+			\stretch, currStretch, \window, window,
 			\pan, pan
 		]);
+		Routine({
+			var delta;
+
+			loop {
+				currStretch = currStretch * 1.1;
+				paul.set(\stretch, currStretch);
+
+				delta = ~rr.(1, 5);
+				delta.yield;
+			};
+		}).play
 	};
 
 	envBuf.loadCollection(envSignal);
