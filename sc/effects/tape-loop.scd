@@ -1,18 +1,4 @@
 (
-~sr = { |n| n.softRound(0.01, 0) }; // round
-~rr = { |min, max| ~sr.(rrand(min, max)) }; // rounded random - min < r < max
-
-~r  = ~rr.(0, _); // rounded random - 0 < r < max
-~r1 = ~r.(1.0); // rounded random - 0 < r < 1.0
-
-~q = { |c, t, f| if(c,{t},{f})}; // ternary operator :D
-~lim = { |n, min, max, vmin, vmax|
-	~q.((n > min) and: (n < max),
-		n,
-		~q.((n >= max), vmax, vmin)
-	);
-};
-
 SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0, bufnum=0, cutLevel=1, cutStart=0, cutLength=0, playRate=1, dist=0.2;
 	var envFreq = ((BufSampleRate.kr(bufnum) * playRate) / BufSamples.kr(bufnum)) * 10;
 	var envMod = Env([0.1, 0.6, 0.4, 1.0], [1, 1.1, 1, 1.2] , \exp, loopNode: 1).circle;
@@ -43,9 +29,9 @@ SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0
 }).add;
 
 
-~load_and_play_loop = { arg filename, outBus = 0, effectBus = 0, level = 1.0, direct = 0.5, startRate = 0.5, startDist = 0.2, pan = 0;
-	var routine;
+~tapeloop_loadAndPlay = { arg filename, outBus = 0, effectBus = 0, level = 1.0, direct = 0.5, startRate = 0.5, startDist = 0.2, pan = 0;
 	var basename = PathName(filename).fileName;
+	var synth;
 
 	var createRoutine = { arg sampleBuf;
 		var numFrames = sampleBuf.numFrames;
@@ -55,23 +41,19 @@ SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0
 
 		Routine({
 			var delta;
-			var n = 0;
 
 			var cutLevel = 1;
 			var cutStart = 0;
 			var cutLength = 0;
 			var coinValue = 0.3;
 
-			var playDirection = ~q.(startRate < 0, -1, 1);
+			var playDirection = ~q.((startRate < 0), -1, 1);
 			var rate = startRate.abs;
 			var rateDeltaDir = -1; // initially, lower rate each loop
 
 			var distLevel = startDist;
 
-			var synth;
-
 			loop {
-				n = n + 1;
 				coinValue = coinValue + degradeModifier;
 
 				if (coinValue.coin, {
@@ -84,14 +66,14 @@ SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0
 					cutLength = 0;
 				});
 
-				"LOOP|#".post; n.post; "|".post; basename.post;
+				"LOOP|".post; basename.post;
 				" -- rate: ".post; (rate * playDirection).post;
 				" -- dist: ".post; distLevel.postln;
 
-				if (not(synth.isNil)) { // stop synth if playing
+				if (not(synth.isNil), {
 					synth.stop;
 					synth.free;
-				};
+				});
 
 				synth = Synth(\tapeloop_play, [\outBus, outBus, \effectBus, effectBus,
 					\bufnum, sampleBuf,
@@ -118,5 +100,7 @@ SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0
 	};
 
 	Buffer.readChannel(s, filename, channels: [0], action: createRoutine);
+
+	synth;
 };
 )

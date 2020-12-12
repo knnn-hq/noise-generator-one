@@ -46,17 +46,28 @@ s.waitForBoot({
 	~feed = Synth.before(~delay, \feedbacker, [\effectBus, ~busDelay,
 		\rt, 0.2, \level, 0.3, \direct, 0.3, \pan, 0
 	]);
-	~stock = Synth.before(~wetReverb, \stockhaus, [\effectBus, ~busWetReverb,
-		\level, 0.15,
-		\direct, 0,
-		\freq, 70
-	]);
 	~vinyl = Synth.before(~delay, \vinyl, [\effectBus, ~busDelay, \level, 0.1, \direct, 0]);
 
-	~playOrder = Routine({
-		[100, 200].do({ |dur| dur.yield });
-	});
+	~playOrder = Routine({ [100, 200].do({ |dur| dur.yield }) });
 	~playList = Routine({ ["piano-1.wav", "piano-2.wav" ].do({ |f| f.yield }) });
+
+	~window = Window.new.front;
+	~window.view.decorator = FlowLayout(~window.view.bounds);
+    ~window.view.background = Color.rand;
+
+	~addController = { | synth, name, initVal = 1.0, prop = \level |
+		Routine({
+			~window.view.decorator.nextLine;
+			EZNumber(~window,
+				~window.view.bounds.width @ 20, name ++ " " ++ prop ++ " ",
+				ControlSpec(0, 1, \lin, step: 0.05),
+				{ |ez| synth.set(prop, ez.value) },
+				initVal,
+				labelWidth: ~window.view.bounds.width * 0.65,
+				numberWidth: ~window.view.bounds.width * 0.35
+			);
+		}).play(AppClock);
+	};
 
 	Pbind(
 		\instrument, \kick,
@@ -68,6 +79,8 @@ s.waitForBoot({
 		\effectBus, ~busDelay
 	).play;
 
+	~addController.(~feed, "feedback", initVal: 1.0);
+	~addController.(~vinyl, "vinyl", initVal: 0.3);
 
 
 	Task({
@@ -79,13 +92,20 @@ s.waitForBoot({
 			delta.notNil
 		} {
 			var filename = wavDir +/+ ~playList.next;
+			var basename = PathName(filename).fileNameWithoutExtension;
+			var paul, tape;
+			var paulLevel = ~rr.(0.6, 0.8);
+			var tapeLevel = ~rr.(0.15, 0.4);
 
-			~load_and_stretch.(filename, effectBus: ~busReverb, direct: 0, stretch: 1500, level: ~rr.(0.6, 0.8), pan: 0.5 * pan);
-			(~rr.(5, 15)).wait;
-			~load_and_play_loop.(filename, startRate: pan * 0.5, effectBus: ~busReverb, level: ~rr.(0.2, 0.3), direct: 0, startDist: 0.1, pan: 0.3 * pan);
+			paul = ~paulstretch_loadAndPlay.(filename, effectBus: ~busReverb, direct: 0, stretch: 1500, level: paulLevel, pan: 0.5 * pan);
+			~addController.(paul, "Stretch " ++ basename, initVal: paulLevel);
+			(~rr.(1, 2)).wait;
+			tape = ~tapeloop_loadAndPlay.(filename, startRate: pan * 0.5, effectBus: ~busReverb, level: tapeLevel, direct: 0, startDist: 0.15, pan: 0.3 * pan);
+			~addController.(tape, "Loop " ++ basename, initVal: tapeLevel);
 			pan = pan * -1;
 		}
 	}).play;
+
 
 	Task({
 		var delta;
@@ -93,6 +113,7 @@ s.waitForBoot({
 		var panDirection = -1;
 		var rt = 0.25;
 		var midiBase = 40;
+
 		loop {
 			midiBase = [27, 36, 45, 50].choose;
 			pan = pan + (0.1 * panDirection);

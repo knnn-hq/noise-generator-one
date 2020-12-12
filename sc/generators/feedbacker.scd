@@ -21,5 +21,4 @@ SynthDef(\feedbacker, { arg outBus = 0, effectBus = 0, level = 1, direct = 0.5, 
 	Out.ar(effectBus, loc * (1 - direct));
 	Out.ar(outBus, loc * direct);
 }).add;
-
 )
