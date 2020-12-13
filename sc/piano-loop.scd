@@ -2,7 +2,7 @@
 var wavDir = PathName.new(Document.current.dir).parentPath +/+ "wav";
 
 s.waitForBoot({
-	s.options.memSize = 500000;
+	s.options.memSize = 1000000;
 	TempoClock.default.tempo_(0.5);
 
 	Require("helpers/**", always: true);
@@ -15,7 +15,7 @@ s.waitForBoot({
 	~busFilter = Bus.audio(s, 2);
 
 	// Master - everything goes through ~filter
-	~filter = Synth.new(\stockhausFilter, [\inBus, ~busFilter, \dry, 0.5, \freq, 90]);
+	~filter = Synth(\SplitComb, [\inBus, ~busFilter]);
 	// Subtle reverb
 	~reverb = Synth.before(~filter, \Reverb, [\inBus, ~busReverb, \outBus, ~busFilter,
 		\roomSize, 14,
