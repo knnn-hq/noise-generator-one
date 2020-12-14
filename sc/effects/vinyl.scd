@@ -21,12 +21,12 @@ var noisefuncs = [
 ];
 
 
-SynthDef(\vinyl, { arg outBus=0, effectBus=0, level=1, direct=1, pan=0;
+SynthDef(\vinyl, { arg out=0, fx=0, amp=1, dry=1, pan=0;
 	var output = LPF.ar(GrayNoise.ar(0.001), 100) + BPF.ar(Dust2.ar(0.01, 0.1), 230, 0.2);
 	noisefuncs.do({ |f| output = f.(output);});
-	output = output * level;
+	output = output * amp;
 
-	Out.ar(effectBus, output * (1 - direct));
-	Out.ar(outBus, output * direct);
+	// Panned output
+	~outWithSidechain.(output, out, fx, amp, pan, dry);
 }).add;
 )

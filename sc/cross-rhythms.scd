@@ -21,9 +21,9 @@ s.waitForBoot({
 	~busReverb = Bus.audio(s, 2);
 	~busDelay = Bus.audio(s, 2);
 
-	~master = Synth(\Master, [\inBus, ~busMaster]);
+	~master = Synth(\Master, [\in, ~busMaster]);
 
-	~reverb = Synth.before(~master, \Reverb, [\inBus, ~busReverb, \outBus, ~busMaster,
+	~reverb = Synth.before(~master, \Reverb, [\in, ~busReverb, \out, ~busMaster,
 		\roomSize, 15,
 		\dry, 0.9,
 		\time, 5,
@@ -31,7 +31,7 @@ s.waitForBoot({
 		\tail, 0.3,
 		\damping, 0.7
 	]);
-	~delay = Synth.before(~reverb, \Greyish, [\inBus, ~busDelay, \outBus, ~busReverb,
+	~delay = Synth.before(~reverb, \Greyish, [\in, ~busDelay, \out, ~busReverb,
 		\damping, 0.2,
 		\delayTime, 15,
 		\diffusion, 0.7,
@@ -43,27 +43,27 @@ s.waitForBoot({
 		\instrument, \electrohihat,
 		\dur, Pseq(hhbeatA, inf),
 		\pan, -0.7,
-		\level, 0.4,
-		\direct, 0,
-		\effectBus, ~busReverb
+		\amp, 0.4,
+		\dry, 0,
+		\fx, ~busReverb
 	).play;
 
 	Pbind(
 		\instrument, \clap,
 		\dur, Pseq(hhbeatB, inf),
 		\pan, 0.7,
-		\level, 0.1,
-		\direct, 0,
-		\effectBus, ~busReverb
+		\amp, 0.1,
+		\dry, 0,
+		\fx, ~busReverb
 	).play;
 
 	Pbind(
 		\instrument, \electrosnare,
 		\dur, Pseq(snbeat, inf),
 		\pan, -0.3,
-		\level, 0.3,
-		\direct, 0,
-		\effectBus, ~busReverb
+		\amp, 0.3,
+		\dry, 0,
+		\fx, ~busReverb
 	).play;
 
 
@@ -71,14 +71,14 @@ s.waitForBoot({
 		\instrument, \electrokick,
 		\dur, Pseq(kbeat, inf),
 		\pan, 0.2,
-		\level, 0.6,
-		\direct, 0,
-		\effectBus, ~busReverb
+		\amp, 0.6,
+		\dry, 0,
+		\fx, ~busReverb
 	).play;
 
 	Pbind(
 		\instrument, \fatsaw,
-		\level, 0.4,
+		\amp, 0.4,
 		\attack, 0.5,
 		\decay, 0.1,
 		\sustain, 1,
@@ -86,8 +86,8 @@ s.waitForBoot({
 		\filterSpeed, Pfunc({rand(0.5)}),
 		\filterFreqStart, 50,
 		\filterFreqEnd, 800,
-		\direct, 0,
-		\effectBus, ~busDelay,
+		\dry, 0,
+		\fx, ~busDelay,
 		\pan, 1,
 		\dur, Pseq(sawbeat.collect(_*3), inf),
 		\midinote, Pfunc({#[48, 52].choose})
@@ -96,13 +96,13 @@ s.waitForBoot({
 
 	Pbind(
 		\instrument, \organ,
-		\level, Pseq([0.6,0.15,0.2,0.25,0.3,0.25,0.2,0.15]*0.1, inf),
+		\amp, Pseq([0.6,0.15,0.2,0.25,0.3,0.25,0.2,0.15]*0.1, inf),
 		\attack, 0.5,
 		\decay, 0.1,
 		\sustain, 0.5,
 		\release, 0.1,
-		\direct, 0,
-		\effectBus, ~busReverb,
+		\dry, 0,
+		\fx, ~busReverb,
 		\pan, -1,
 		\dur, Pseq(orgbeat, inf),
 		\midinote, Pseq([60, 64, 67], inf)

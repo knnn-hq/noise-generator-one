@@ -21,7 +21,7 @@ s.waitForBoot({
 	tempo.schedAbs(tempo.nextBar, {tempo.beatsPerBar_(lcm)});
 
 	~busReverb = Bus.audio(s, 2);
-	~reverb = Synth(\Reverb, [\inBus, ~busReverb,
+	~reverb = Synth(\Reverb, [\in, ~busReverb,
 		\roomSize, 15,
 		\dry, 0.9,
 		\time, 15,
@@ -68,7 +68,7 @@ s.waitForBoot({
 		\amp, Prand([0.8, 0.77, 0.82], inf),
 		\freq1, 80,
 		\freq2, 30,
-		\effectBus, ~busReverb
+		\fx, ~busReverb
 	).play;
 
 	pr1 = Pbind(
@@ -81,7 +81,7 @@ s.waitForBoot({
 		\pan, 0.4,
 		\midinote, Pseq(#[rest, 45], inf),
 		\dur, lcmbeat / 1.5,
-		\effectBus, ~busReverb
+		\fx, ~busReverb
 	).play;
 
 	pr1 = Pbind(
@@ -94,7 +94,7 @@ s.waitForBoot({
 		\pan, -0.4,
 		\midinote, Pseq(#[rest, rest, rest, 57, 64, 57, 57], inf),
 		\dur, lcmbeat / 6,
-		\effectBus, ~busReverb
+		\fx, ~busReverb
 	).play;
 
 
@@ -115,6 +115,7 @@ s.waitForBoot({
 			tempoValue = tempoValue * (ratio + rrand(-0.025, 0.025));
 			tempo.tempo_(tempoValue);
 			delta = tempo.beatDur * (2..lcm).choose;
+			
 			delta.yield;
 		};
 	}).play;

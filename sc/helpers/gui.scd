@@ -30,7 +30,7 @@
 	items.do({ |item, i| text = text ++ (if(i > 0,{" , "},{": "})) ++ item; });
 	Routine({~gh_logview.setString(text ++ "\n", 0, 0)}).play(AppClock);
 };
-~gh_mkNum = { arg synth, name, prop = \level, initVal = 1.0, min = 0, max = 1.0, step = 0.05;
+~gh_mkNum = { arg synth, name, prop = \amp, initVal = 1.0, min = 0, max = 1.0, step = 0.05;
 	Routine({
 		var ezn;
 		var width = ~gh_win.view.bounds.width * 0.9;
