@@ -14,4 +14,13 @@
 		~q.((n >= max), vmax, vmin)
 	);
 };
+
+//// Routing:
+~outWithSidechain = { arg snd, out = 0, fx = 0, amp = 1.0, pan = 0, dry = 0;
+	snd = Pan2.ar(snd, pan, amp);
+
+	Out.ar(fx, snd * (1 - dry));
+	Out.ar(out, snd * dry);
+};
+
 )

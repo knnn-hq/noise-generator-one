@@ -31,8 +31,10 @@ s.waitForBoot({
 	///
 	/// FILTERS
 	///
+
 	// Master - everything goes through ~filter
 	~filter = Synth(\SplitComb, [\inBus, ~busFilter]);
+
 	// Subtle reverb
 	~reverb = Synth.before(~filter, \Reverb, [\inBus, ~busReverb, \outBus, ~busFilter,
 		\roomSize, 14,
@@ -64,19 +66,19 @@ s.waitForBoot({
 	///
 	/// INSTRUMENTS
 	///
-	~feed = Synth.before(~delay, \feedbacker, [\effectBus, ~busDelay,
-		\rt, 0.2, \level, 0.3, \direct, 0.3, \pan, 0
+	~feed = Synth.before(~delay, \feedbacker, [\fx, ~busDelay,
+		\rt, 0.2, \amp, 0.3, \dry, 0.3, \pan, 0
 	]);
-	~vinyl = Synth.before(~delay, \vinyl, [\effectBus, ~busDelay, \level, 0.1, \direct, 0]);
+	~vinyl = Synth.before(~delay, \vinyl, [\fx, ~busDelay, \amp, 0.1, \dry, 0]);
 
 	Pbind(
 		\instrument, \kick,
 		\dur, Pseq([Rest(5), 1, Rest(5)], inf),
 		\freq, 70,
 		\gliss, 0.9,
-		\level, 0.1,
-		\direct, 0,
-		\effectBus, ~busDelay
+		\amp, 0.1,
+		\dry, 0,
+		\fx, ~busDelay
 	).play;
 
 
@@ -108,8 +110,8 @@ s.waitForBoot({
 			var paulLevel = ~rr.(0.6, 0.8);
 			var tapeLevel = ~rr.(0.15, 0.4);
 
-			paul = ~paulstretch_loadAndPlay.(filename, effectBus: ~busReverb, direct: 0, stretch: 1500, level: paulLevel, pan: 0.5 * pan);
-			tape = ~tapeloop_loadAndPlay.(filename, startRate: pan * 0.5, effectBus: ~busReverb, level: tapeLevel, direct: 0, startDist: 0.15, pan: 0.3 * pan);
+			paul = ~paulstretch_loadAndPlay.(filename, fx: ~busReverb, dry: 0, stretch: 1500, amp: paulLevel, pan: 0.5 * pan);
+			tape = ~tapeloop_loadAndPlay.(filename, startRate: pan * 0.5, fx: ~busReverb, amp: tapeLevel, dry: 0, startDist: 0.15, pan: 0.3 * pan);
 			~gh_mkNum.(paul, "Stretch " ++ basename, initVal: paulLevel);
 			~gh_mkNum.(tape, "Loop " ++ basename, initVal: tapeLevel);
 

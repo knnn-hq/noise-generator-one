@@ -1,5 +1,5 @@
 (
-SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0, bufnum=0, cutLevel=1, cutStart=0, cutLength=0, playRate=1, dist=0.2;
+SynthDef(\tapeloop_play, { arg out=0, fx=0, amp=1, dry=0.5, pan=0, bufnum=0, cutLevel=1, cutStart=0, cutLength=0, playRate=1, dist=0.2;
 	var envFreq = ((BufSampleRate.kr(bufnum) * playRate) / BufSamples.kr(bufnum)) * 10;
 	var envMod = Env([0.1, 0.6, 0.4, 1.0], [1, 1.1, 1, 1.2] , \exp, loopNode: 1).circle;
 
@@ -20,16 +20,17 @@ SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0
 		EnvGen.kr(Env.step([1, cutLevel, 1], [cutStart, cutLength, 0]))
 	});
 	var revbuf = GVerb.ar(playbuf, 23, 4, 0.4, 0.19, 14, -3.dbamp, -9.dbamp, -11.dbamp, 80, 0.3);
-	var output = Pan2.ar((revbuf + playbuf), pan * (panNoiseEnv - 0.05), level);
+
+	var output = Pan2.ar((revbuf + playbuf), pan * (panNoiseEnv - 0.05), amp);
 
 	RecordBuf.ar(recordbuf, bufnum,  doneAction: 2, loop: 0);
 
-	Out.ar(effectBus, output * (1 - direct));
-	Out.ar(outBus, output * direct);
+	Out.ar(fx, output * (1 - dry));
+	Out.ar(out, output * dry);
 }).add;
 
 
-~tapeloop_loadAndPlay = { arg filename, outBus = 0, effectBus = 0, level = 1.0, direct = 0.5, startRate = 0.5, startDist = 0.2, pan = 0;
+~tapeloop_loadAndPlay = { arg filename, out = 0, fx = 0, level = 1.0, dry = 0.5, startRate = 0.5, startDist = 0.2, pan = 0;
 	var basename = PathName(filename).fileName;
 	var synth;
 
@@ -75,13 +76,13 @@ SynthDef(\tapeloop_play, { arg outBus=0, effectBus=0, level=1, direct=0.5, pan=0
 					synth.free;
 				});
 
-				synth = Synth(\tapeloop_play, [\outBus, outBus, \effectBus, effectBus,
+				synth = Synth(\tapeloop_play, [\out, out, \fx, fx,
 					\bufnum, sampleBuf,
 					\cutLevel, cutLevel,
 					\cutStart, cutStart,
 					\cutLength, cutLength,
 					\level, level,
-					\direct, direct,
+					\dry, dry,
 					\playRate, rate * playDirection,
 					\dist, distLevel,
 					\pan, pan

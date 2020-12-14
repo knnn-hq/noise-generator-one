@@ -1,6 +1,6 @@
 (
-SynthDef(\feedbacker, { arg outBus = 0, effectBus = 0, level = 1, direct = 0.5, pan = 0, midiBase = 40, rt = 0.25;
-	var freq = Duty.ar(16/rt, 0, Dseq([0,8,7,-1,1,4,5].collect(_ + midiBase).midicps, inf));
+SynthDef(\feedbacker, { arg out = 0, fx = 0, amp = 1, dry = 0.5, pan = 0, miditone = 40, rt = 0.25;
+	var freq = Duty.ar(16/rt, 0, Dseq([0,8,7,-1,1,4,5].collect(_ + miditone).midicps, inf));
 
 	var src = Saw.ar(freq) * Decay.ar(Impulse.ar(rt),1/rt,0.25);
 	//src = SoundIn.ar(0);
@@ -16,9 +16,6 @@ SynthDef(\feedbacker, { arg outBus = 0, effectBus = 0, level = 1, direct = 0.5, 
 	loc = HPF.ar(loc, 100);
 ///	LocalOut.ar(loc * 1.75);
 
-	loc = Pan2.ar(Limiter.ar(loc), pan, level);
-
-	Out.ar(effectBus, loc * (1 - direct));
-	Out.ar(outBus, loc * direct);
+	~outWithSidechain.(Limiter.ar(loc), out, fx, amp, pan, dry);
 }).add;
 )

@@ -1,5 +1,6 @@
 (
-SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0.5, bufnum, envBufnum, pan = 0, stretch = 50, window = 0.25, amp = 1|
+SynthDef(\paulstretchMono, { 
+	arg out = 0, fx = 0, amp = 1.0, dry = 0.5, bufnum, envBufnum, pan = 0, stretch = 50, window = 0.25, amp = 1;
 	// Paulstretch for SuperCollider
 	// Based on the Paul's Extreme Sound Stretch algorithm by Nasca Octavian PAUL
 	// https://github.com/paulnasca/paulstretch_python/blob/master/paulstretch_steps.png
@@ -30,7 +31,7 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 	// Extraction of 2 consecutive grains
 	// Both grains need to be treated together for superposition afterwards
 	sig = [GrainBuf.ar(1, trig, trigPeriod, bufnum, 1, pos, envbufnum: envBufnum),
-		GrainBuf.ar(1, trig, trigPeriod, bufnum, 1, pos + (trigPeriod/(2*stretch)), envbufnum: envBufnum)]*amp;
+		GrainBuf.ar(1, trig, trigPeriod, bufnum, 1, pos + (trigPeriod/(2*stretch)), envbufnum: envBufnum)];
 	// FFT magic
 	sig = sig.collect({ |item, i|
 		chain = FFT(LocalBuf(fftSize), item, hop: 1.0, wintype: -1);
@@ -43,14 +44,13 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 	sig = sig*PlayBuf.ar(1, envBufnum, 1/(trigPeriod), loop:1);
 	// Delay second grain by half a grain length for superposition
 	sig[1] = DelayC.ar(sig[1], trigPeriod/2, trigPeriod/2);
+
 	// Panned output
-	output = Pan2.ar(Mix.new(sig), pan) * level;
-	Out.ar(outBus, output * direct);
-	Out.ar(effectBus, output * (1 - direct));
+	~outWithSidechain.(Mix.new(sig), out, fx, amp, pan, dry);
 }).add;
 
 
-~paulstretch_loadAndPlay = { arg filename, outBus = 0, effectBus = 0, level = 1.0, direct = 0.5, stretch = 50, window = 0.25, pan = 0;
+~paulstretch_loadAndPlay = { arg filename, out = 0, fx = 0, amp = 1.0, dry = 0.5, stretch = 50, window = 0.25, pan = 0;
 	var envBuf = Buffer.alloc(s, s.sampleRate, 1);
 	var envSignal = Signal.newClear(s.sampleRate).waveFill({ |x| (1 - x.pow(2)).pow(1.25)}, -1.0, 1.0);
 	var currStretch = 10;
@@ -63,9 +63,9 @@ SynthDef(\paulstretchMono, { |outBus = 0, effectBus = 0, level = 1.0, direct = 0
 		Routine({
 			var delta;
 			synth = Synth(\paulstretchMono, [
-				\outBus, outBus, \effectBus, effectBus,
+				\out, out, \fx, fx,
 				\bufnum, buffer, \envBufNum, envBuf,
-				\level, level, \direct, direct,
+				\amp, amp, \dry, dry,
 				\stretch, currStretch, \window, window,
 				\pan, pan
 			]);
