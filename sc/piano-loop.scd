@@ -12,14 +12,25 @@ includes.keys.do({ |dir|
 });
 
 s.waitForBoot({
+	///
+	/// INIT
+	///
 	s.options.memSize = 1000000;
 	TempoClock.default.tempo_(0.5);
 
+
+	///
+	/// BUSSES
+	///
 	~busReverb = Bus.audio(s, 2);
 	~busWetReverb = Bus.audio(s, 2);
 	~busDelay  = Bus.audio(s, 2);
 	~busFilter = Bus.audio(s, 2);
 
+
+	///
+	/// FILTERS
+	///
 	// Master - everything goes through ~filter
 	~filter = Synth(\SplitComb, [\inBus, ~busFilter]);
 	// Subtle reverb
@@ -49,15 +60,14 @@ s.waitForBoot({
 		\size, 0.3
 	]);
 
+
+	///
+	/// INSTRUMENTS
+	///
 	~feed = Synth.before(~delay, \feedbacker, [\effectBus, ~busDelay,
 		\rt, 0.2, \level, 0.3, \direct, 0.3, \pan, 0
 	]);
 	~vinyl = Synth.before(~delay, \vinyl, [\effectBus, ~busDelay, \level, 0.1, \direct, 0]);
-
-	~playOrder = Routine({ [100, 200].do({ |dur| dur.yield }) });
-	~playList = Routine({ ["piano-1.wav", "piano-2.wav" ].do({ |f| f.yield }) });
-
-	~gh_mkWindow.("KNNN: `Piano Loops`");
 
 	Pbind(
 		\instrument, \kick,
@@ -69,9 +79,20 @@ s.waitForBoot({
 		\effectBus, ~busDelay
 	).play;
 
+
+	///
+	/// GUI
+	///
+	~gh_mkWindow.("KNNN: `Piano Loops`");
 	~gh_mkNum.(~feed, "Feedbacker", initVal: 0.3);
 	~gh_mkNum.(~vinyl, "vinyl", initVal: 0.3);
 
+
+	///
+	/// Piano loops
+	///
+	~playOrder = Routine({ [100, 200].do({ |dur| dur.yield }) });
+	~playList = Routine({ ["piano-1.wav", "piano-2.wav" ].do({ |f| f.yield }) });
 
 	Task({
 		var delta;
@@ -81,22 +102,25 @@ s.waitForBoot({
 			delta = ~playOrder.next;
 			delta.notNil
 		} {
+			var paul, tape;
 			var filename = wavDir +/+ ~playList.next;
 			var basename = PathName(filename).fileNameWithoutExtension;
-			var paul, tape;
 			var paulLevel = ~rr.(0.6, 0.8);
 			var tapeLevel = ~rr.(0.15, 0.4);
 
 			paul = ~paulstretch_loadAndPlay.(filename, effectBus: ~busReverb, direct: 0, stretch: 1500, level: paulLevel, pan: 0.5 * pan);
-			(~rr.(1, 2)).wait;
 			tape = ~tapeloop_loadAndPlay.(filename, startRate: pan * 0.5, effectBus: ~busReverb, level: tapeLevel, direct: 0, startDist: 0.15, pan: 0.3 * pan);
 			~gh_mkNum.(paul, "Stretch " ++ basename, initVal: paulLevel);
 			~gh_mkNum.(tape, "Loop " ++ basename, initVal: tapeLevel);
+
 			pan = pan * -1;
 		}
 	}).play;
 
 
+	///
+	/// Main loop
+	///
 	Task({
 		var delta;
 		var pan = 0;
