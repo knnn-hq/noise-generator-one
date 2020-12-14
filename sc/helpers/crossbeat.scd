@@ -4,16 +4,17 @@
 		((curr * prev) / gcd(prev, curr)).asInt;
 	});
 };
-~crossbeat = { arg basenote = 8, beats = [3, 2], rest = true, bars = 1;
+~crossbeat = { arg basenote = 8, beats = [3, 2], rest = true;
 	var notelen = 1 / basenote;
 	var barlen = ~lcmarr.(beats); // ~lcmarr.([3, 2]) => 6
 
 	beats.collect({ | beat |
-		var beatlen = barlen / beat;
+		var beatlen = (1 / beat) * notelen;
+		var numcells = (barlen / beat).asInt;
 		var cell = if (rest, {
-			[ notelen ] ++ (Rest(notelen) ! (beatlen - 1));
-		}, { [notelen * beatlen] });
-		(cell ! (beat * bars)).flatten;
+			[ beatlen ] ++ (Rest(beatlen) ! (beat - 1));
+		}, { [beatlen * beat] });
+		(cell ! (numcells)).flatten;
 	});
 };
 
