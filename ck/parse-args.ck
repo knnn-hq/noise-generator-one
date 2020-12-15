@@ -1,63 +1,61 @@
-public class ArgParser
-{
-    int numArgs;
-    string arguments[];
+public class ArgParser {
+    Arg arguments[0];
 
-    static fun string[] split(string str, string sep, int max) {
-        string res[];
-        0 => int found;
-        str => string curr;
-        curr.rfind(sep) => int currInd;
+    public void add(string arg) {
+        Stringer.split(arg, ",") @=> string args[];
 
-        while (currInd >= 0 && (max < 0 || found < max)) {
-            found++;
-            res << curr.substring(currInd + 1, curr.length() - currInd - 1);
-            curr.erase(currInd, curr.length() - currInd);
-            curr.rfind(sep) => currInd;
-        }
-
-        return res;
-    }
-    static fun string[] split(string str, string sep) {
-        return ArgParser.split(str, sep, -1);
-    }
-    string fun string[] findAll(string str, string[] needles) {
-        string res[];
-
-        for (0 => int i; i < needles.size(); i++) {
-          str.find(needles[i]) => res[needles[i]];
-        }
-        return res;
-    }
-
-    fun void addArg(string label, string value) {
-      value => arguments[label];
-    }
-    fun void addArg(string arg, int labelEnd, string value) {
-      addArg(arg.substring(0, labelEnd), value);
-    }
-    fun void addArg(string arg, int labelEnd) {
-      addArg(arg, labelEnd, arg.substring(labelEnd + 1, arg.length() - labelEnd));
-    }
-
-    fun void parseArgs(string[] args) {
-        for (0 => int i; i < me.numArgs(); i++) {
-            ArgParser.split(me.args(i), ",") => string[] currArgs;
-
-            for (0 => int j; j < currArgs.size(); j++) {
-                currArgs[j] => string currArg;
-                ArgParser.findAll(currArg, "=", "-off", "-on") => string f[];
-
-                if (f["="] >= 0) {
-                    addArg(currArg, f["="]);
-                } else if (f["-off"] >= 0) {
-                    addArg(currArg, f["-off"], "false");
-                } else if (f["-on"] >= 0){
-                    addArg(currCarg, f["-on"], "true");
-                } else {
-                    addArg(currArg, "true");
-                }
-            }
+        for (0 => int i; i < args.size(); i++) {
+            Arg.parse(args[i]) @=> Arg a;
+            a @=> arguments[a.key];
         }
     }
+
+    public void init(Shred sh) {
+        for (0 => int i; i < sh.args(); i++) {
+            add(sh.arg(i));
+        }
+    }
+
+    public int isSet(string key) {
+        return arguments.find(key) != 0;
+    }
+
+    public int checkFlag(string key, int defaultValue) {
+        if (!isSet(key)) {
+            return defaultValue;
+        }
+        return !arguments[key].isFlagOff();
+    }
+
+    public int checkFlag(string key) {
+        return checkFlag(key, true);
+    }
+
+    public string get(string key, string default) {
+        if (isSet(key)) {
+            return arguments[key].getValue(default);
+        }
+        return default;
+    }
+
+    public string get(string key) {
+        return get(key, key);
+    }
+
+    public int get(string key, int default) {
+        get(key) => string val;
+        if (val == key) {
+            return default;
+        }
+        return Std.atoi(val);
+    }
+
+    public float get(string key, float default) {
+        get(key) => string val;
+        if (val == key) {
+            return default;
+        }
+        return Std.atof(val);
+    }
+
 }

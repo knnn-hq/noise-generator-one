@@ -1,29 +1,30 @@
-if( !me.args() ) {
-    <<<"chuck looper.ck:<filename>:[rate]">>>
+ArgParser arg;
+arg.init(me);
+
+if (!arg.isSet("filename")) {
+    <<< "Usage:" >>>;
+    <<< "\tchuck looper.ck:<load=filename>[,rate=0.5][,gain=0.6][,res=100]" >>>;
+
     me.exit();
 }
 
-me.arg(0) => string filename;
-0.5 => float endRate;
+arg.get("load") => string filename;
+arg.get("rate", 0.5) => float endRate;
+arg.get("gain", 0.6) => float gain;
+arg.get("res", 100) => float res;
 
-if (me.numArgs() > 1) {
-    me.arg(1) => endRate;
-}
 
 // the patch 
 SndBuf buf => dac;
 
 // load the file
 filename => buf.read;
+gain => buf.gain;
 
 // time loop
-while( true )
-{
- //   0 => buf.pos;
-    Math.random2f(.2,.5) => buf.gain;
-
+while (true) {
     if (buf.rate >= endRate) {
         buf.rate * 0.99 => buf.rate;
     }
-    100::ms => now;
+    res::ms => now;
 }
