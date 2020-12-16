@@ -17,18 +17,21 @@ public class Stringer {
         curr.rfind(sep) => int currInd;
 
         while (currInd >= 0 && (max < 0 || found < max)) {
-            found++;
+            res.size(found+1);
 
             if (currInd < curr.length() - 1) {
-                res << curr.substring(currInd + 1, curr.length() - currInd - 1);
+                curr.substring(currInd + 1, curr.length() - currInd - 1) => res[found];
             } else {
-                res << "";
+                "" => res[found];
             }
             curr.erase(currInd, curr.length() - currInd);
             curr.rfind(sep) => currInd;
+
+            found++;
         }
         if (curr.length() > 0) {
-            res << curr;
+            res.size(found + 1);
+            curr => res[found];
         }
 
         return res;
