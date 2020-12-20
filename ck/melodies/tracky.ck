@@ -84,9 +84,6 @@ class TrackyTrack {
 }
 
 public class Tracky {
-    1   => int octave;
-    0.0 => float pan;
-    0.5 => float velocity;
     1   => int skipWhenRemixing;
     string sourceTrack[];
     TrackyTrack roll;
@@ -123,11 +120,8 @@ public class Tracky {
         TrackyTrack.create(newTrack) @=> roll;
     }
 
-    fun static Tracky create(int newOctave, float newPan, float newVel, int remixSkip, string track[]) {
+    fun static Tracky create(int remixSkip, string track[]) {
         Tracky tr;
-        newOctave => tr.octave;
-        newPan => tr.pan;
-        newVel => tr.velocity;
         track @=> tr.sourceTrack;
         remixSkip => tr.skipWhenRemixing;
 
@@ -135,8 +129,8 @@ public class Tracky {
 
         return tr;
     }
-    fun static Tracky create(int newOctave, float newPan, float newVel, string track[]) {
-        return Tracky.create(newOctave, newPan, newVel, 1, track);
+    fun static Tracky create(string track[]) {
+        return Tracky.create(1, track);
     }
 
     0 => static int NoteBlank;

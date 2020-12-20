@@ -1,63 +1,59 @@
 // patch
-PRCRev r => Gain globGain => dac;
+Dyno d => PRCRev r => Gain globGain => dac;
 .9 => globGain.gain;
 .4 => r.mix;
 
+d.limit();
+
 // misc
 Event e;
-58.27 => float Bb;
-19 => int alphaOctave;
 
-// player
-fun void playtrack(Event e, Tracky track) {
-    Tunafish.createAlpha(Bb) @=> Tunafish alphaTunerBb; // Bb alpha-scale
-    PercFlut inst => Gain g => Pan2 p => r;
+fun void playTrack(Event e, Tracky track, int index) {
+    Percy perc => AgingTape ag => d;
+    
+    <<< "Starting track:", index >>>;
+    
+    index % 2 == 0 && index  => int isEven;
+    (index % 4) - isEven     => int modIndex;
+    Math.min(index, 2) $ int => int clampIndex;
+    1 - (2 * isEven)         => int panDir;
 
-    Math.random2f(1.4, 2.3) * track.octave => inst.lfoSpeed;
-    Math.random2f(0.05, 0.1) => inst.lfoDepth;
-
-    track.velocity / 2 => g.gain;
-    track.pan => p.pan;
-
-    // infinite time loop
-    Tracky.NoteBlank => int lastNote;
+    0.2 * modIndex * panDir   => perc.pan;
+    (clampIndex) + 1        => perc.octave;
+    0.8 - (clampIndex * 0.15) => perc.gain;
+    0.9 - (clampIndex * 0.10) => perc.velocity;
+    0.8 - (clampIndex * 0.05) => ag.post_gain;
+    // (clampIndex * 0.05) => ag.feedback;
 
     while (true) {
         e => now;
-
-        track.nextNote() => int note;
-        
-        if (note == Tracky.NoteRest) {
-            track.velocity => inst.noteOff;
-            track.velocity => inst.afterTouch;
-        } else if (note != Tracky.NoteBlank) {
-            alphaTunerBb.note(note + (alphaOctave * (track.octave - 1))) => inst.freq;
-            Std.rand2f(track.velocity - 0.05, track.velocity + 0.05) => inst.noteOn;
-        } else if (lastNote == Tracky.NoteRest) {
-            track.velocity / 2 => inst.afterTouch;
-        }
-        note => lastNote;
+        track.nextNote() => perc.noteOn;
     }
 }
-spork ~ playtrack(e, Tracky.create(1, 0.2, 0.9, ["1 5"]));
 
 Tracky tracks[0];
-
-tracks << Tracky.create(3, -0.8, 0.8, 0, [
-    " # > > > | % ",
-    " > > > > | % ",
-    " 7 > > > | > > > > ",
-    " # > > > | 5 > # > ",
-    " 9 > > > | 4 > 9 > "
-]);
-tracks << Tracky.create(2, -0.4, 0.7, [
+tracks << Tracky.create(["1 5"]);
+tracks << Tracky.create([
     " #  >  >  > > | % ",
     " 11 >  >  > > ",
     " >  > 10  > > ",
     " 13 >  > 14 > ",
     " >  >  >  > > "
 ]);
-tracks << Tracky.create(3, 0.2, 0.6, 0, [
+tracks << Tracky.create([
+    " > > >   > > > > | %",
+    "19 > >  15 > > # ",
+    "18 > >  14 > > # ",
+    " > > >   > > > > "
+]);
+tracks << Tracky.create([
+    " # > > > | % ",
+    " > > > > | % ",
+    " 7 > > > | > > > > ",
+    " # > > > | 5 > # > ",
+    " 9 > > > | 4 > 9 > "
+]);
+tracks << Tracky.create([
     " > >>> > >>  5 > 4 > ",
     " 1 >>> > >>  5 > > > ",
     " 1 >>> > >>  5 > 8 >",
@@ -67,24 +63,17 @@ tracks << Tracky.create(3, 0.2, 0.6, 0, [
     " > >>> 7 >>  > > > > ",
     " # >>> > >>  > > > >"
 ]);
-
-tracks << Tracky.create(3, 0.4, 0.6, 0, [
+tracks << Tracky.create([
     "> > > > > > | % ",
     " 4 > > > > > ",
     " > > 5 > > > ",
     " 9 > > 1 > >"
 ]);
-tracks << Tracky.create(2, 0.8, 0.8, [
-    " > > >   > > > > | %",
-    "19 # >  25 # > > ",
-    "20 # >  25 # > > ",
-    " > > >   > > > > "
-]);
 
     0 => int tempoWaitCounter;
     0 => int trackWaitCounter;
  10.0 => float baseDelta;
-240.0 => float currDelta;
+500.0 => float currDelta;
   0.0 => float targetDelta;
     1 => int minChange;
     4 => int maxChange;
@@ -95,6 +84,10 @@ false => int changeTempo;
     1 => int nextTrack;
    32 => int waitForNext;
     2 => int waitFactor;
+    1 => int startedTracks;
+
+spork ~ playTrack(e, tracks[0], 0);
+
 
 while(true) {
     baseDelta +=> actualDelta;
@@ -105,8 +98,9 @@ while(true) {
         0  => actualDelta;
 
         if (trackWaitCounter == waitForNext) {
-            <<< "Starting track:", nextTrack >>>;
             tracks[nextTrack] @=> Tracky nt;
+            spork ~ playTrack(e, nt, startedTracks);
+            startedTracks++;
             nextTrack++;
             if (nextTrack >= tracks.size()) {
                 1 => nextTrack;
@@ -114,8 +108,6 @@ while(true) {
             }
             Std.rand2(nt.trackLength(), nt.trackLength() * waitFactor) => waitForNext;
             0 => trackWaitCounter;
-
-            spork ~ playtrack(e, nt);
         }
 
         e.broadcast();
