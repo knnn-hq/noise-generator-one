@@ -1,0 +1,33 @@
+root: Bb
+tempo: 40
+
+0.
+octave: 1
+shuffle: false
+bars:
+     1  >  5  >  1  >  |  5  >  1  >  5  >
+1.
+octave: 2
+shuffle: false 
+bars:
+    11  >  > 10  >  >  |  >  >  >  13 >  >
+    13  >  >  >  >  >  | 14  >  >  >  >  >
+    >   >  >  >  >  >  | %
+
+2.
+octave: 2
+shuffle: false
+bars:
+     7  >  >  >  5  >  |  >  >  9  >  >  >
+     4  >  >  >  9  >  |  >  >  >  >  >  >
+     % | %
+
+3.
+octave: 2
+shuffle: false
+bars:
+     4  >  >  >  >  6  |  >  >  >  >  9  >
+     >  >  >  4  >  >  |  >  >  5  >  >  >
+     >  9  >  >  >  >  |  6  >  >  5  >  9
+     >  >  >  >  4  >  |  >  5  >  6  >  >
+     >  >  9  >  >  8  |  2  >  >  >  >  >
