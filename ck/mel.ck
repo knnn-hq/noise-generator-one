@@ -1,9 +1,12 @@
-//require("lib/tracky.ck")
-//require("chugens/aging-tape.ck")
-//require("chugens/percy.ck")
+// See 'pm/Chuck/Runner.pm'...
+// #include "lib/stringer.ck"
+// #include "lib/tracky.ck"
+// #include "chugens/aging-tape.ck"
+// #include "chugens/percy.ck"
 
 // patch
 Dyno d => PRCRev r => Gain globGain => dac;
+
 .9 => globGain.gain;
 .4 => r.mix;
 
@@ -83,11 +86,10 @@ tracks << Tracky.create([
     4 => int maxChange;
 false => int changeTempo;
     0 => float actualDelta;
-  256 => int waitForChange;
+  64 => int waitForChange;
   
     1 => int nextTrack;
-   32 => int waitForNext;
-    2 => int waitFactor;
+   16 => int waitForNext;
     1 => int startedTracks;
 
 spork ~ playTrack(e, tracks[0], 0);
@@ -103,15 +105,18 @@ while(true) {
 
         if (trackWaitCounter == waitForNext) {
             tracks[nextTrack] @=> Tracky nt;
+
             spork ~ playTrack(e, nt, startedTracks);
+
             startedTracks++;
             nextTrack++;
+
             if (nextTrack >= tracks.size()) {
                 1 => nextTrack;
-                waitFactor++;
             }
-            Std.rand2(nt.trackLength(), nt.trackLength() * waitFactor) => waitForNext;
+
             0 => trackWaitCounter;
+            Std.rand2(nt.trackLength() >> 1, nt.trackLength() << 1) => waitForNext;
         }
 
         e.broadcast();
@@ -134,7 +139,7 @@ while(true) {
                     deltaDelta +=> currDelta;
                 }
             } else if (tempoWaitCounter == waitForChange) {
-                currDelta - baseDelta => targetDelta;
+                Std.rand2f(currDelta - (3 * baseDelta), currDelta - baseDelta) => targetDelta;
                 <<< "Ramping delta to: ", targetDelta, " ms" >>>;
                 true => changeTempo;
             }

@@ -1,4 +1,4 @@
-//require("internal/tracky-track.ck")
+// #include "internal/tracky-track.ck"
 
 public class Tracky {
     1   => int skipWhenRemixing;

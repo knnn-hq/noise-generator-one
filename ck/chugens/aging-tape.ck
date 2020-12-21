@@ -15,7 +15,7 @@ public class AgingTape extends Chugen {
     0.01  => float quantum;
     0.2  => float cut;
     0.8  => float post_gain;
-    0.3  => float modAmount;
+    0.1  => float modAmount;
     0.5  => float modRate;
 
     float window[0];
