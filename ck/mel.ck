@@ -1,3 +1,7 @@
+//require("lib/tracky.ck")
+//require("chugens/aging-tape.ck")
+//require("chugens/percy.ck")
+
 // patch
 Dyno d => PRCRev r => Gain globGain => dac;
 .9 => globGain.gain;

@@ -1,3 +1,5 @@
+//require('../lib/tunafish.ck')
+
 public class Percy extends Chubgraph {
     Tunafish _t;
     
