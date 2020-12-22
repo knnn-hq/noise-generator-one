@@ -26,10 +26,11 @@ fun void playTrack(Event e, Tracky track, int index) {
     1 - (2 * isEven)         => int panDir;
 
     0.2 * modIndex * panDir   => perc.pan;
-    (clampIndex) + 1        => perc.octave;
+    (clampIndex) + 1          => perc.octave;
     0.8 - (clampIndex * 0.15) => perc.gain;
     0.9 - (clampIndex * 0.10) => perc.velocity;
-    0.8 - (clampIndex * 0.05) => ag.post_gain;
+    1.3 + (clampIndex * 0.05) => ag.pre_gain;
+    0.6 - (clampIndex * 0.05) => ag.post_gain;
     // (clampIndex * 0.05) => ag.feedback;
 
     while (true) {

@@ -8,7 +8,6 @@ use Carp;
 use File::Slurp;
 use Path::Tiny;
 
-
 BEGIN {
 	use Exporter ();
 	our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
@@ -26,6 +25,8 @@ sub new {
 	my $class = ref($proto) || $proto;
     my $self = bless {}, $class;
 	my %params = @_;
+
+    $self->{chuck} = $params{chuck} || 'chuck';
 
 	return $self;
 }

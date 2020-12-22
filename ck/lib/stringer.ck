@@ -1,9 +1,13 @@
 public class Stringer {
+    fun static string replace(string input, string find, string replacement) {
+        return Stringer.join(Stringer.split(input, find), replacement);
+    }
+
     fun static string join(string strs[], string sep) {
         "" => string result;
         for (0 => int i; i < strs.size(); i++) {
             if (i > 0) {
-                "," +=> result;
+                sep +=> result;
             }
             strs[i] +=> result;
         }
@@ -12,6 +16,7 @@ public class Stringer {
 
     fun static string[] split(string str, string sep, int max) {
         string res[0];
+        string out[0];
         0 => int found;
         str => string curr;
         curr.rfind(sep) => int currInd;
@@ -33,8 +38,12 @@ public class Stringer {
             res.size(found + 1);
             curr => res[found];
         }
+        while(found >= 0) {
+            out << res[found];
+            found--;
+        }
 
-        return res;
+        return out;
     }
 
     fun static string[] split(string str, string sep) {

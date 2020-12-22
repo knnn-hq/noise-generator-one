@@ -4,7 +4,7 @@ public class Tunafish {
     
     fun void repeatCentStep(float centStep, int numDegrees) {
         cents << 0;
-        for (0 => int i; i < numDegrees; i++) {
+        for (1 => int i; i < numDegrees; i++) {
             cents << (centStep * i);
         }
     }

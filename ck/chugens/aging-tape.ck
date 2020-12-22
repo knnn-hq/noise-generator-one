@@ -1,6 +1,7 @@
 public class AgingTape extends Chugen {
-    11025.0 => float _sr; 
-    1.0/11025.0 => float _t;
+    8000.0 => float sampleRate; 
+    1.0/sampleRate => float _t;
+
     0.0 => float _x_p;
     0.0 => float _x_q_p;
     0.0 => float _y_p;
@@ -10,22 +11,27 @@ public class AgingTape extends Chugen {
     
     0.8  => float pre_gain;
     0.1  => float bias;
-    0.05  => float hysteresis;
+    0.05 => float hysteresis;
     0.1  => float hysteresisWidth;
-    0.01  => float quantum;
+    0.01 => float quantum;
     0.2  => float cut;
     0.8  => float post_gain;
     0.1  => float modAmount;
     0.5  => float modRate;
 
     float window[0];
-    1024  => int windowSize;
+    4096  => int windowSize;
     0     => int windowWritePos;
     0     => int windowReadPos;
     false => int addFeedback;
+    0     => int feedbackRepeat;
+    0.2   => float feedbackRate;
     0.1   => float feedback;
 
     0 => int uptime;
+
+    ((second/samp) / sampleRate)  => float sampleRateRatio;
+    0 => int sampleRateWait;
 
     {
         window.size(windowSize);
@@ -40,25 +46,37 @@ public class AgingTape extends Chugen {
         _x_quant(x_sat, _x_q_p, _t, quantum) => float x_quant;
         _play(x_quant, _y_p, cut) => float y;
 
+        if (sampleRateWait > 0) {
+            Math.max(sampleRateWait / sampleRateRatio, 0.5) => float prevSampleMix;
+            sampleRateWait--;
+            return _mix(y, _y_p, prevSampleMix);
+        }
         x => _x_p;
         x_quant => _x_q_p;
         y => _y_p;
 
+        (sampleRateRatio) $ int => sampleRateWait;
+
         return _output(y * post_gain);
     }
-
 
     fun float _output(float y) {
         Std.fabs(y) => float abs_y;
         if (windowWritePos == windowSize - 1) {
-            addFeedback++;
+            true => addFeedback;
         }
         if (addFeedback && abs_y < feedbackLimit) {
             (1/windowSize) * windowReadPos * 0.45 => float ff;
             _mix(y, window[windowReadPos], (feedback * 0.5) + (feedback * ff)) => y;
-            (windowReadPos+1) % windowSize => windowReadPos;
+
+            feedbackRepeat--;
+
+            if (feedbackRepeat == 0) {
+                (1 / Std.rand2f(feedbackRate, 0.8)) $ int * windowSize => feedbackRepeat;
+                (windowReadPos+1) % windowSize => windowReadPos;
+            }
         }
-        if (abs_y > modLimit) {
+        if (abs_y > feedbackLimit) {
             y => window[windowWritePos];
             (windowWritePos+1) % windowSize => windowWritePos;
         }
@@ -76,7 +94,8 @@ public class AgingTape extends Chugen {
             -1 *=> float modSign;
         }
         while (true) {
-            if (Std.fabs(_y_p) > modLimit) {
+            Std.fabs(_y_p) => float abs_y;
+            if (abs_y > modLimit) {
                 uptime++;
 
                 uptime $ float / maxTime => float mod;
@@ -89,7 +108,7 @@ public class AgingTape extends Chugen {
                 Math.min(0.9, mod4 * modAmount + quantum) => quantum;
                 Math.min(0.9, mod4 * mod * modAmount + hysteresis) => hysteresis;
 
-                if (modRate < _sr) {
+                if (modRate < sampleRate) {
                     mod2 * modAmount +=> modRate;
                 }
             }
@@ -134,7 +153,7 @@ public class AgingTape extends Chugen {
         Std.fabs(dx) => float _dx;
         Std.rand2f(0.0, 1.0) * 10.0 => float r;
 
-        _dx * Math.pow(1.0 - q, T*_sr*8.0) => float x_r;
+        _dx * Math.pow(1.0 - q, T*sampleRate*8.0) => float x_r;
 
         if (r < x_r){
             return x;

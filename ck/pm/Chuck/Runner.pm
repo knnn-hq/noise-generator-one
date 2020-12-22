@@ -3,8 +3,7 @@ package Chuck::Runner;
 
 use strict;
 use warnings;
-use strict;
-use warnings;
+
 use Carp;
 
 use File::Slurp;
@@ -23,9 +22,9 @@ sub new {
 	my $self = $class->SUPER::new();
 	bless ($self, $class);
 
-    $self->{chuck_command} = $params{chuck_command} || 'chuck';
     $self->{chuck_args} = $params{chuch_args} || '';
-    $self->{chuck_shreds} = ();
+
+    $self->{shreds} = ();
     $self->{cwd} = Path::Tiny->cwd();
     $self->{dependencies} = {};
 
@@ -36,28 +35,12 @@ sub new {
 sub start_chuck {
     my ($self, @files) = @_;
 
+    $self->{cwd} = Path::Tiny->cwd;
+
     return $self
         ->_add_dependencies(\@files)
         ->_update_chuck_shreds()
         ->_run_chuck_command();
-}
-
-sub _run_chuck_command {
-    my ($self) = @_;
-    system join(' ', $self->{chuck_command}, $self->{chuck_args}, @{$self->{chuck_shreds}});
-
-    return $self;
-}
-
-sub _update_chuck_shreds {
-    my ($self) = @_;
-    my @files = map { "\"$_\"" } map { path($_)->relative($self->{cwd})->stringify } sort { 
-        $self->{dependencies}->{$b} <=> $self->{dependencies}->{$a} 
-    } keys %{$self->{dependencies}};
-
-    $self->{chuck_shreds} = \@files;
-
-    return $self;
 }
 
 ### Will parse files multiple times, which has the benefit of not requiring
@@ -80,13 +63,32 @@ sub _add_dependencies {
         my @included_files = ();
         
         foreach my $line(@content) {
-            if ($line =~ m|^//\s*\#\s*include\s+["']?([^'"]+)["']|i) {
+            # eg // #include "file/script.ck"
+            if ($line =~ m{ ^// \s* \#include \s+ ["'] ([^'"]+) ["'] }xi) {
                 push @included_files, $1;
             }
         }
 
         $self->_add_dependencies(\@included_files, $dirname, $level + 1);
     }
+
+    return $self;
+}
+
+sub _run_chuck_command {
+    my ($self) = @_;
+    system join(' ', $self->{chuck}, $self->{chuck_args}, @{$self->{chuck_shreds}});
+
+    return $self;
+}
+
+sub _update_chuck_shreds {
+    my ($self) = @_;
+    my @files = map { "\"$_\"" } map { path($_)->relative($self->{cwd})->stringify } sort { 
+        $self->{dependencies}->{$b} <=> $self->{dependencies}->{$a} 
+    } keys %{$self->{dependencies}};
+
+    $self->{chuck_shreds} = \@files;
 
     return $self;
 }
