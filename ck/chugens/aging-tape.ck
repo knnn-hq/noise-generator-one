@@ -1,40 +1,38 @@
 public class AgingTape extends Chugen {
-    8000.0 => float sampleRate; 
+    28000.0 => float sampleRate; 
     1.0/sampleRate => float _t;
 
     0.0 => float _x_p;
     0.0 => float _x_q_p;
     0.0 => float _y_p;
-
-    0.001 => float modLimit;
-    0.05  => float feedbackLimit;
     
     0.8  => float pre_gain;
-    0.1  => float bias;
+    0.05  => float bias;
     0.05 => float hysteresis;
-    0.1  => float hysteresisWidth;
+    0.01  => float hysteresisWidth;
     0.01 => float quantum;
-    0.2  => float cut;
+    0.04 => float cut;
     0.8  => float post_gain;
-    0.1  => float modAmount;
-    0.5  => float modRate;
 
-    float window[0];
-    4096  => int windowSize;
-    0     => int windowWritePos;
-    0     => int windowReadPos;
-    false => int addFeedback;
-    0     => int feedbackRepeat;
-    0.2   => float feedbackRate;
-    0.1   => float feedback;
+    0.2  => float maxBias;
+    0.2 => float maxHysteresis;
+    0.05  => float maxHysteresisWidth;
+    0.2 => float maxQuantum;
+    0.5  => float maxCut;
+
 
     0 => int uptime;
 
-    ((second/samp) / sampleRate)  => float sampleRateRatio;
-    0 => int sampleRateWait;
+    Noise _noise 
+        => Phasor _lfo
+        => Phasor _lfo2 
+        => blackhole;
 
     {
-        window.size(windowSize);
+        0.5  => _lfo.freq;
+        0.04 => _lfo2.freq;
+        1.0 => _lfo2.phase;
+
         spork ~ _modulate();
     }
 
@@ -46,73 +44,40 @@ public class AgingTape extends Chugen {
         _x_quant(x_sat, _x_q_p, _t, quantum) => float x_quant;
         _play(x_quant, _y_p, cut) => float y;
 
-        if (sampleRateWait > 0) {
-            Math.max(sampleRateWait / sampleRateRatio, 0.5) => float prevSampleMix;
-            sampleRateWait--;
-            return _mix(y, _y_p, prevSampleMix);
-        }
         x => _x_p;
         x_quant => _x_q_p;
         y => _y_p;
 
-        (sampleRateRatio) $ int => sampleRateWait;
-
-        return _output(y * post_gain);
+        return y * post_gain;
     }
 
-    fun float _output(float y) {
-        Std.fabs(y) => float abs_y;
-        if (windowWritePos == windowSize - 1) {
-            true => addFeedback;
-        }
-        if (addFeedback && abs_y < feedbackLimit) {
-            (1/windowSize) * windowReadPos * 0.45 => float ff;
-            _mix(y, window[windowReadPos], (feedback * 0.5) + (feedback * ff)) => y;
-
-            feedbackRepeat--;
-
-            if (feedbackRepeat == 0) {
-                (1 / Std.rand2f(feedbackRate, 0.8)) $ int * windowSize => feedbackRepeat;
-                (windowReadPos+1) % windowSize => windowReadPos;
-            }
-        }
-        if (abs_y > feedbackLimit) {
-            y => window[windowWritePos];
-            (windowWritePos+1) % windowSize => windowWritePos;
-        }
-        return y;
-    }
-
-    fun float _mix(float direct, float effect, float wet) {
-        return (direct * (1.0 - wet)) + (effect * wet);
+    fun float _apply(float base, float lfo) {
+        return base * lfo;
     }
 
     fun void _modulate() {
-        60.0 * 5.0 => float maxTime; // 5 min
-        1.0 => float modSign;
-        if (Std.randf() < 0) {
-            -1 *=> float modSign;
-        }
+        0.0001 => float _t;
+        0.00001 => float _dt; 
         while (true) {
-            Std.fabs(_y_p) => float abs_y;
-            if (abs_y > modLimit) {
-                uptime++;
+            _lfo.last()  * _tanh(_t) * _t  => float lfoVal;
+            _lfo2.last() * _tanh(_t) => float lfoVal2;
+            _dt +=> _t;
 
-                uptime $ float / maxTime => float mod;
-                mod * mod => float mod2;
-                mod2 * mod => float mod3;
-                mod2 * mod2 => float mod4;
-
-                Math.min(0.9, mod2 * modAmount + hysteresisWidth) => hysteresisWidth;
-                Math.min(0.9, mod3 * modAmount + cut) => cut;
-                Math.min(0.9, mod4 * modAmount + quantum) => quantum;
-                Math.min(0.9, mod4 * mod * modAmount + hysteresis) => hysteresis;
-
-                if (modRate < sampleRate) {
-                    mod2 * modAmount +=> modRate;
-                }
+            if (_t >= 1.0) {
+                -1 *=> _dt;
+                0.99999 => _t; 
+            } else if (_t <= 0.0) {
+                -1 *=> _dt;
+                0.00001 => _t;
             }
-            (1 /  modRate)::second => now;
+
+            maxBias            * lfoVal  => bias;
+            maxHysteresisWidth * lfoVal2 => hysteresisWidth;
+            maxHysteresis      * lfoVal  => hysteresis;
+            maxQuantum         * lfoVal  => quantum;
+            maxCut             * lfoVal2 => cut;
+
+            ((second/samp) / sampleRate)::samp => now;
         }
     }
 
