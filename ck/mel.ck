@@ -1,45 +1,65 @@
 // See 'pm/Chuck/Runner.pm'...
 // #include "lib/stringer.ck"
 // #include "lib/tracky.ck"
-// #include "chugens/aging-tape.ck"
+// #include "chugens/freeze.ck"
 // #include "chugens/percy.ck"
-// #include "chugens/repeaty.ck"
-// #include "chugens/spectrum.ck"
+// #include "chugens/tape-machine.ck"
 
 // patch
-Dyno d => PRCRev r => Gain globGain => Dyno master => dac;
+PRCRev r => Freeze fr => TapeMachine tape => Dyno master => Gain globGain => dac;
 
-Gain specGain => master;
-Gain echoGain => master;
+.9 => master.gain => globGain.gain;
+.4 => r.mix;
+.0 => fr.mix;
 
-.9 => master.gain;
-.7 => globGain.gain;
-.3 => r.mix;
-
-0.2 => specGain.gain => echoGain.gain;
-
-d.limit();
 master.limit();
 
 // misc
 Event e;
 
+fun void stutter() {
+    while (true) {
+        1::second => now;
+
+        if (Math.randomf() > 0.98) {
+            <<< "Freezing..." >>>;
+            1.0 => fr.playbackRate;
+            Std.rand2f(0.5, 0.75) => float goalRate;
+
+            fr.freeze();
+
+            while (fr.mix() < 1.0) {
+                0.05 + fr.mix() => fr.mix;
+                10::ms => now;
+            }
+            while(fr.playbackRate() > goalRate) {
+                fr.playbackRate() - 0.01 => fr.playbackRate;
+                10::ms => now;
+            }
+            
+            Std.rand2f(750,4500)::ms => now;
+            
+            Std.rand2f(0.9,1.2) => goalRate;
+
+            while(fr.playbackRate() < goalRate) {
+                fr.playbackRate() + 0.01 => fr.playbackRate;
+                10::ms => now;
+            }
+            while (fr.mix() > 0.0) {
+                fr.mix() - 0.1 => fr.mix;
+                10::ms => now;
+            }
+            0.0 => fr.mix;
+            fr.thaw();
+        }
+    }
+}
+
 fun void playTrack(Event e, Tracky track, int index) {
-    Percy perc => AgingTape ag => LPF plpf => d;
-    ag => HPF phpf => d;
-    ag => Repeaty rpt => PitShift pitch => LPF elpf => Echo ec => echoGain;
-    ag => SpectrumOfFiniteScale sp => LPF slpf => specGain;
+    Percy perc => r;
     
     <<< "Starting track:", index >>>;
 
-    Std.rand2f(0.2, 0.5)    => ag.maxHysteresis;
-    Std.rand2(5, 10)        => rpt.length;
-    Std.rand2f(-2.0, -2.5)  => pitch.shift;
-    Std.rand2(200,300)::ms  => ec.delay;
-    Std.rand2(600,900)::ms  => ec.max;
-    Std.rand2(900,1800)::ms => sp.stutter;
-    1.0 => ec.mix => sp.mix;
-    
     index % 2 == 0 && index  => int isEven;
     (index % 4) - isEven     => int modIndex;
     Math.min(index, 2) $ int => int clampIndex;
@@ -49,13 +69,6 @@ fun void playTrack(Event e, Tracky track, int index) {
     (clampIndex) + 1          => perc.octave;
     0.8 - (clampIndex * 0.15) => perc.gain;
     0.9 - (clampIndex * 0.10) => perc.velocity;
-    1500 * (clampIndex + 1)   => plpf.freq;
-    200 * (clampIndex + 1)    => phpf.freq;
-    750 * (clampIndex + 1)    => elpf.freq;
-    1000 * (clampIndex + 1)   => slpf.freq;
-    1.3 + (clampIndex * 0.05) => ag.pre_gain;
-    0.6 - (clampIndex * 0.05) => ag.post_gain;
-    // (clampIndex * 0.05) => ag.feedback;
 
     while (true) {
         e => now;
@@ -118,7 +131,7 @@ false => int changeTempo;
     1 => int startedTracks;
 
 spork ~ playTrack(e, tracks[0], 0);
-
+spork ~ stutter();
 
 while(true) {
     baseDelta +=> actualDelta;
