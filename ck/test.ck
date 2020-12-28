@@ -1,5 +1,5 @@
 // #include "chugens/wavet.ck"
-WaveT.create_c64_B() @=> WaveT wav;
+WaveT.create_c64_E() @=> WaveT wav;
 wav => Dyno d => Gain g => dac;
 0.7 => wav.gain => g.gain;
 
