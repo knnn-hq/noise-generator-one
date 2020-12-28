@@ -69,7 +69,7 @@ class Flutter extends Effect {
 
     fun void _update() {
         while (true) {
-            10::ms => now;
+            1::samp => now;
 
             for (0 => int i; i < _size; i++) {
                 Math.pow(2.0, _lfos[i].last()) => _shifts[i].shift;
@@ -109,7 +109,7 @@ public class FlutterAndWow extends Effect {
         0.6 => _flutter.mix;
         0.8 => _wow.mix;
 
-        0.5 => mix;
+        1.0 => mix;
 
         spork ~ _update();
     }
@@ -117,9 +117,13 @@ public class FlutterAndWow extends Effect {
     fun void _update() {
         0.01 => float t;
         while (true) {
-            30::ms => now;
+            2::samp => now;
+			if (Math.randomf() > 0.9) {
+				1.2 => t;
+			}
             t * t => float t_2;
             t_2 * t_2 => float t_4;
+
 
             _lfoFlutter.last() + 1.0 => float flutterLfo;
             _lfoWow.last() + 1.0 => float wowLfo;

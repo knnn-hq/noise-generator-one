@@ -27,13 +27,13 @@ public class TapeMachine extends Effect {
     {
         1::ms => _fatten.delay => _fatten.max;
 
-        1.75 => _agingTape.pre_gain;
+        2.0 => _agingTape.pre_gain;
         0.8 => _agingTape.post_gain;
-        0.6 => _wow.mix;
-        1.0 => mix;
-        2000 => _hpf.freq;
-        4000 => _lpf.freq;
+        0.7 => _wow.mix;
+        0.99 => mix;
+        2500 => _hpf.freq;
+        3500 => _lpf.freq;
         0.25 => _lpfMix.gain => _hpfMix.gain => _fattenMix.gain;
-        0.3 => _dryMix.gain;
+        0.8 => _dryMix.gain;
     }
 }

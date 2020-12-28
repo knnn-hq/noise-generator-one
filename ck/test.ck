@@ -1,32 +1,21 @@
-// #include "chugens/cellblock.ck"
-// #include "chugens/spectrum.ck"
-// #include "chugens/aging-tape.ck"
+// #include "chugens/ondes.ck"
 
-SinOsc s1 => Mix2 mx => SpectrumOfFiniteScale sp => AgingTape at => Dyno d => Gain g => dac;
-SinOsc s2 => mx;
-
-0.5 => s1.gain;
-0.3 => s2.gain;
-220 => s1.freq => s2.freq;
-0.5 => s2.phase;
-1.0 => sp.mix;
-//1.0 => cb.mix => sp.mix;
-
-// -0.5 => sp.pitchShift;
-// 0.9 => sp.wet;
-// 100::ms => sp.stutter;
-
+Ondes ondes => Dyno d => Gain g => dac;
+ondes.initVoices(6);
+0.7 => ondes.gain;
 0.8 => g.gain;
 
 d.limit();
 
-[220.0, 261.6256, 329.6276] @=> float tones[];
-
+[45, 48, 52, 43, 55, 57] @=> int tones[];
 while (true) {
-    tones[Std.rand2(0, tones.size()-1)] => s1.freq;
-    s1.freq() * 3 + Std.rand2f(0.5, 5.0) => s2.freq;
-    if (s1.freq() >= 880) {
-        220 => s1.freq;
-    }
-    1000::ms => now;
+    tones[Std.rand2(0, tones.size()-1)] => ondes.noteOn;
+	Std.rand2f(399,401)::ms => now;
+	if (Math.randomf() > 0.97) {
+		ondes.freq() / 3 => ondes.noteOn;
+    	Std.rand2f(998,1001)::ms => now;
+	} 
+	ondes.freq() * 1.5 => ondes.noteOn;
+	Std.rand2f(599,601)::ms => now;
+
 }

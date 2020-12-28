@@ -13,6 +13,8 @@ if ($#files < 0) {
     exit;
 }
 
-my $runner = new Chuck::Runner;
+my $runner = new Chuck::Runner(
+	chuck_args => '--bufsize:8192 --channels:1 --srate:44100'
+);
 
 $runner->start_chuck(@files);

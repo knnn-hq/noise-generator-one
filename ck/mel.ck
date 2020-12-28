@@ -6,9 +6,8 @@
 // #include "chugens/tape-machine.ck"
 
 // patch
-PRCRev r => Freeze fr => TapeMachine tape => Dyno master => Gain globGain => dac;
-
-.9 => master.gain => globGain.gain;
+PRCRev r => Freeze fr =>  TapeMachine tape => Dyno master => dac;
+.9 => master.gain;
 .4 => r.mix;
 .0 => fr.mix;
 
