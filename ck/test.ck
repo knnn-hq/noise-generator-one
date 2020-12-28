@@ -27,7 +27,7 @@ while (true) {
 
 	if (Math.randomf() > 0.96) {
 		ondes.freq() / choose([1.5, 3.0]) => ondes.noteOn;
-    	humanize(1400) => now;
+    	humanize(1200) => now;
 	} 
 	if (Math.randomf() > 0.98) {
 		ondes.freq() * choose([2.5, 3.0]) => ondes.noteOn;
