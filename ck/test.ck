@@ -7,15 +7,34 @@ ondes.initVoices(6);
 
 d.limit();
 
-[45, 48, 52, 43, 55, 57] @=> int tones[];
+[45, 48, 52, 43, 55, 57, 45] @=> int tones[];
+
+fun dur humanize(float millis) {
+	Std.rand2f(millis * 0.99, millis * 1.01) => float duration;
+	return duration::ms;
+}
+fun float choose(int list[]) {
+	return list[Std.rand2(0, list.size() -1)] $ float;
+}
+fun float choose(float list[]) {
+	return list[Std.rand2(0, list.size() -1)];
+}
+
 while (true) {
-    tones[Std.rand2(0, tones.size()-1)] => ondes.noteOn;
-	Std.rand2f(399,401)::ms => now;
-	if (Math.randomf() > 0.97) {
-		ondes.freq() / 3 => ondes.noteOn;
-    	Std.rand2f(998,1001)::ms => now;
+	choose(tones) $ int => ondes.noteOn;
+    
+	humanize(400) => now;
+
+	if (Math.randomf() > 0.96) {
+		ondes.freq() / choose([1.5, 3.0]) => ondes.noteOn;
+    	humanize(1400) => now;
 	} 
+	if (Math.randomf() > 0.98) {
+		ondes.freq() * choose([2.5, 3.0]) => ondes.noteOn;
+    	humanize(600) => now;
+	}
 	ondes.freq() * 1.5 => ondes.noteOn;
-	Std.rand2f(599,601)::ms => now;
+	
+	humanize(600) => now;
 
 }
