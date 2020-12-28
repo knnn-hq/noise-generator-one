@@ -38,9 +38,21 @@
         "net5.0": {
           "targetAlias": "net5.0",
           "dependencies": {
-            "OscCore": {
+            "Haukcode.Osc": {
               "target": "Package",
-              "version": "[1.0.5, )"
+              "version": "[1.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.CommandLine": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[5.0.0, )"
             },
             "fc.tui-core": {
               "target": "Package",

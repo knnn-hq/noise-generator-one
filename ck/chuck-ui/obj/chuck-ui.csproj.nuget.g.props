@@ -15,4 +15,27 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
+  <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Content Include="$(NuGetPackageRoot)haukcode.osc/1.0.0/contentFiles/any/netstandard2.0/LICENSE.txt" Condition="Exists('$(NuGetPackageRoot)haukcode.osc/1.0.0/contentFiles/any/netstandard2.0/LICENSE.txt')">
+      <NuGetPackageId>Haukcode.Osc</NuGetPackageId>
+      <NuGetPackageVersion>1.0.0</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Private>False</Private>
+      <Link>LICENSE.txt</Link>
+    </Content>
+    <Content Include="$(NuGetPackageRoot)haukcode.osc/1.0.0/contentFiles/any/netstandard2.0/Notes.txt" Condition="Exists('$(NuGetPackageRoot)haukcode.osc/1.0.0/contentFiles/any/netstandard2.0/Notes.txt')">
+      <NuGetPackageId>Haukcode.Osc</NuGetPackageId>
+      <NuGetPackageVersion>1.0.0</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Private>False</Private>
+      <Link>Notes.txt</Link>
+    </Content>
+    <Content Include="$(NuGetPackageRoot)haukcode.osc/1.0.0/contentFiles/any/netstandard2.0/README.txt" Condition="Exists('$(NuGetPackageRoot)haukcode.osc/1.0.0/contentFiles/any/netstandard2.0/README.txt')">
+      <NuGetPackageId>Haukcode.Osc</NuGetPackageId>
+      <NuGetPackageVersion>1.0.0</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Private>False</Private>
+      <Link>README.txt</Link>
+    </Content>
+  </ItemGroup>
 </Project>

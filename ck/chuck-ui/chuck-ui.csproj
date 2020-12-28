@@ -8,7 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="fc.tui-core" Version="0.0.6" />
-    <PackageReference Include="OscCore" Version="1.0.5" />
+    <PackageReference Include="Haukcode.Osc" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

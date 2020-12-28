@@ -1,9 +1,7 @@
-// #include "chugens/ondes.ck"
-
-Ondes ondes => Dyno d => Gain g => dac;
-ondes.initVoices(6);
-0.7 => ondes.gain;
-0.8 => g.gain;
+// #include "chugens/wavet.ck"
+WaveT.create_c64_B() @=> WaveT wav;
+wav => Dyno d => Gain g => dac;
+0.7 => wav.gain => g.gain;
 
 d.limit();
 0.98 => float downChance;
@@ -23,23 +21,23 @@ fun float choose(float list[]) {
 }
 
 while (true) {
-	choose(tones) $ int => ondes.noteOn;
+	Std.mtof(choose(tones)) => wav.freq;
     
 	humanize(400) => now;
 
 	if (Math.randomf() > downChance) {
-		ondes.freq() / choose([1.5, 3.0]) => ondes.noteOn;
+		wav.freq() / choose([1.5, 3.0]) => wav.freq;
     	humanize(1200) => now;
 	} 
 	if (Math.randomf() > upChance) {
-		ondes.freq() * choose([2.5, 3.0]) => ondes.noteOn;
+		wav.freq() * choose([2.5, 3.0]) => wav.freq;
     	humanize(600) => now;
 		if (Math.randomf() > upChance - 0.02 && upChance > 0) {
 			0.03 -=> upChance;
 			0.001 +=> downChance;
 		}
 	}
-	ondes.freq() * 1.5 => ondes.noteOn;
+	wav.freq() * 1.5 => wav.freq;
 	
 	humanize(600) => now;
 
